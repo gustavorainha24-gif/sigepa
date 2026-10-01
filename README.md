@@ -1,0 +1,1325 @@
+[sigepa4.html](https://github.com/user-attachments/files/32884449/sigepa4.html)
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a3a5c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SIGEPA">
+<link rel="manifest" href="#" id="manifest-link">
+<title>SIGEPA</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #f8f9fb;
+    --border: #e2e5ea;
+    --primary: #1a3a5c;
+    --primary-light: #2563a8;
+    --accent: #e8703a;
+    --accent2: #27ae60;
+    --danger: #e74c3c;
+    --warn: #f39c12;
+    --text: #1a1d23;
+    --text2: #5a6072;
+    --text3: #9aa0b0;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.13);
+    --nav-h: 56px;
+    --tab-h: 48px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+  /* LOGIN */
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%); padding: 20px; }
+  .login-card { background: var(--surface); border-radius: 18px; padding: 40px 32px; width: 100%; max-width: 380px; box-shadow: var(--shadow-lg); }
+  .login-logo { text-align: center; margin-bottom: 32px; }
+  .login-logo .licon { font-size: 44px; display: block; margin-bottom: 10px; }
+  .login-logo h1 { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: 3px; }
+  .login-logo p { font-size: 12px; color: var(--text3); margin-top: 6px; letter-spacing: 0.5px; }
+  .fg { margin-bottom: 16px; }
+  .fg label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .fg input, .fg select, .fg textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 14px; color: var(--text); background: var(--surface2); transition: border 0.2s; outline: none; font-family: inherit; }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--primary-light); background: #fff; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 12px 20px; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.18s; font-family: inherit; }
+  .btn-primary { background: var(--primary); color: #fff; width: 100%; }
+  .btn-primary:hover { background: var(--primary-light); }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-success { background: var(--accent2); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+  .btn-outline:hover { background: var(--primary); color: #fff; }
+  .btn-sm { padding: 7px 16px; font-size: 13px; }
+  .btn-xs { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+  .lerr { background: #fdecea; color: var(--danger); border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 13px; display: none; }
+
+  /* APP SHELL */
+  #app { display: none; min-height: 100vh; flex-direction: column; }
+
+  /* TOPBAR */
+  .topbar { background: var(--primary); color: #fff; padding: 0 16px; height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 10px rgba(0,0,0,0.25); }
+  .tb-left { display: flex; align-items: center; gap: 10px; }
+  .tb-logo { font-size: 22px; font-weight: 900; letter-spacing: 2px; }
+  .tb-sub { font-size: 10px; opacity: 0.55; margin-top: 1px; }
+  .tb-badge { background: rgba(255,255,255,0.18); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+  .tb-right { display: flex; align-items: center; gap: 10px; }
+  .tb-user { font-size: 12px; opacity: 0.8; text-align: right; }
+  .tb-role { font-size: 10px; opacity: 0.5; }
+  .btn-sair { background: rgba(255,255,255,0.13); color: #fff; border: 1px solid rgba(255,255,255,0.22); padding: 6px 14px; font-size: 12px; border-radius: 7px; cursor: pointer; font-weight: 600; }
+  .btn-sair:hover { background: rgba(255,255,255,0.25); }
+
+  /* TABS — SEMPRE VISÍVEIS */
+  .nav-tabs { background: var(--surface); border-bottom: 2px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; position: sticky; top: var(--nav-h); z-index: 190; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab { flex-shrink: 0; padding: 0 18px; height: var(--tab-h); font-size: 13px; font-weight: 600; color: var(--text3); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: all 0.18s; user-select: none; }
+  .nav-tab:hover { color: var(--primary); background: var(--surface2); }
+  .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: transparent; }
+
+  /* MAIN */
+  .main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+
+  /* CARDS */
+  .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+  /* STATS */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat-card { background: var(--surface); border-radius: 9px; padding: 14px 16px; border-left: 4px solid var(--primary); box-shadow: var(--shadow); }
+  .stat-card.warn { border-left-color: var(--warn); }
+  .stat-card.danger { border-left-color: var(--danger); }
+  .stat-card.success { border-left-color: var(--accent2); }
+  .stat-card.accent { border-left-color: var(--accent); }
+  .stat-val { font-size: 24px; font-weight: 800; color: var(--primary); line-height: 1; }
+  .stat-card.warn .stat-val { color: var(--warn); }
+  .stat-card.danger .stat-val { color: var(--danger); }
+  .stat-card.success .stat-val { color: var(--accent2); }
+  .stat-card.accent .stat-val { color: var(--accent); }
+  .stat-lbl { font-size: 11px; color: var(--text3); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* FORM */
+  .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width:580px){ .fgrid { grid-template-columns: 1fr; } }
+  .ffull { grid-column: 1/-1; }
+
+  /* TURNO */
+  .turno-btns { display: flex; gap: 8px; }
+  .tbtn { flex: 1; padding: 10px 6px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface2); cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text2); text-align: center; transition: all 0.18s; user-select: none; }
+  .tbtn.sa { border-color: #2563eb; background: #dbeafe; color: #1e40af; }
+  .tbtn.sb { border-color: #7c3aed; background: #ede9fe; color: #5b21b6; }
+  .tbtn.sc { border-color: #be185d; background: #fce7f3; color: #9d174d; }
+
+  /* AUTOCOMPLETE */
+  .ac-wrap { position: relative; }
+  .ac-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 2px solid var(--primary-light); border-radius: 9px; box-shadow: var(--shadow-lg); z-index: 300; max-height: 220px; overflow-y: auto; display: none; }
+  .ac-list.open { display: block; }
+  .ac-item { padding: 10px 14px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .ac-item:last-child { border-bottom: none; }
+  .ac-item:hover, .ac-item.focused { background: var(--surface2); }
+  .ac-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
+  .badge-manut { background: #fef3c7; color: #92400e; }
+  .badge-outros { background: #dbeafe; color: #1e40af; }
+  .badge-setup { background: #f3e8ff; color: #6b21a8; }
+  .badge-prog { background: #d1fae5; color: #065f46; }
+  .badge-nao { background: #fee2e2; color: #991b1b; }
+  .badge-aberta { background: #fef3c7; color: #92400e; }
+  .badge-fechada { background: #d1fae5; color: #065f46; }
+  .badge-ta { background: #dbeafe; color: #1e40af; }
+  .badge-tb { background: #ede9fe; color: #5b21b6; }
+  .badge-tc { background: #fce7f3; color: #9d174d; }
+
+  /* TIMER */
+  .timer-box { background: var(--primary); color: #fff; border-radius: 10px; padding: 14px; text-align: center; margin: 12px 0; }
+  .timer-val { font-size: 38px; font-weight: 800; font-family: 'Courier New', monospace; letter-spacing: 3px; }
+  .timer-lbl { font-size: 11px; opacity: 0.65; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* TABLE */
+  .twrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 700px; }
+  th { background: var(--surface2); color: var(--text2); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 9px 12px; text-align: left; border-bottom: 2px solid var(--border); white-space: nowrap; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f7f9fc; }
+  .nodata { text-align: center; color: var(--text3); padding: 40px 20px; font-size: 13px; }
+
+  /* FILTROS */
+  .fbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .fbar input, .fbar select { padding: 8px 11px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text); background: var(--surface); outline: none; }
+  .fbar input:focus, .fbar select:focus { border-color: var(--primary-light); }
+
+  /* MODAL */
+  .moverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; display: none; align-items: center; justify-content: center; padding: 16px; }
+  .moverlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 14px; padding: 24px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+  .mtitle { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; }
+  .mclose { cursor: pointer; color: var(--text3); font-size: 22px; line-height: 1; }
+  .mclose:hover { color: var(--danger); }
+
+  /* RELATÓRIO BARRAS */
+  .rbar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .rbar-lbl { font-size: 12px; color: var(--text2); width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+  .rbar-track { flex: 1; background: var(--border); border-radius: 4px; height: 20px; overflow: hidden; }
+  .rbar-fill { height: 100%; border-radius: 4px; background: var(--primary-light); display: flex; align-items: center; justify-content: flex-end; padding-right: 7px; min-width: 40px; transition: width 0.5s; }
+  .rbar-val { font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; }
+
+  /* ALERT */
+  .alert { padding: 11px 14px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; }
+  .alert-success { background: #d1fae5; color: #065f46; }
+  .alert-warn { background: #fef3c7; color: #92400e; }
+  .alert-danger { background: #fee2e2; color: #991b1b; }
+
+  /* SPINNER */
+  .spinner { display: inline-block; width: 26px; height: 26px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading { text-align: center; padding: 36px; }
+
+  /* PARADA ATIVA */
+  #parada-ativa-card { border: 2.5px solid var(--warn); }
+
+  /* FORM ACTIONS */
+  .factions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
+
+  /* PWA install banner */
+  #pwa-banner { display: none; position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 12px 20px; border-radius: 12px; box-shadow: var(--shadow-lg); z-index: 999; font-size: 13px; display: flex; align-items: center; gap: 12px; }
+  #pwa-banner button { background: #fff; color: var(--primary); border: none; padding: 7px 16px; border-radius: 7px; font-weight: 700; cursor: pointer; font-size: 13px; }
+  #pwa-banner .pwa-close { background: none; color: rgba(255,255,255,0.6); padding: 4px 8px; font-size: 16px; }
+
+  @media(max-width:480px){
+    .main { padding: 10px; }
+    .stat-val { font-size: 20px; }
+    .factions { flex-direction: column; }
+    .factions .btn { width: 100%; }
+    .timer-val { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="licon">🏭</span>
+      <h1>SIGEPA</h1>
+      <p>Sistema de Gestão de Paradas</p>
+    </div>
+    <div class="fg">
+      <label>Código de Acesso</label>
+      <input type="text" id="l-cod" placeholder="Ex: OP001" autocomplete="off" style="letter-spacing:2px;text-transform:uppercase;">
+    </div>
+    <div class="fg">
+      <label>Senha</label>
+      <input type="password" id="l-sen" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">Entrar no Sistema</button>
+    <div class="lerr" id="l-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-left">
+      <span style="font-size:22px;">🏭</span>
+      <div>
+        <div class="tb-logo">SIGEPA</div>
+        <div class="tb-sub">Sistema de Gestão de Paradas</div>
+      </div>
+      <span class="tb-badge" id="tb-turno">TURNO A</span>
+    </div>
+    <div class="tb-right">
+      <div>
+        <div class="tb-user" id="tb-nome">—</div>
+        <div class="tb-role" id="tb-nivel">—</div>
+      </div>
+      <button class="btn-sair" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- TABS — sempre fixas -->
+  <div class="nav-tabs" id="nav-tabs">
+    <div class="nav-tab active" data-tab="reg" onclick="setTab('reg')">⏱ Registrar</div>
+    <div class="nav-tab" data-tab="hist" onclick="setTab('hist')">📋 Histórico</div>
+    <div class="nav-tab" data-tab="rel" onclick="setTab('rel')" id="nt-rel">📊 Relatório</div>
+    <div class="nav-tab" data-tab="adm" onclick="setTab('adm')" id="nt-adm" style="display:none;">⚙️ Admin</div>
+  </div>
+
+  <div class="main">
+
+    <!-- ABA REGISTRAR -->
+    <div id="tab-reg">
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-val" id="s-hoje">—</div><div class="stat-lbl">Paradas Hoje</div></div>
+        <div class="stat-card warn"><div class="stat-val" id="s-abertas">—</div><div class="stat-lbl">Em Aberto</div></div>
+        <div class="stat-card danger"><div class="stat-val" id="s-horas">—h</div><div class="stat-lbl">Horas Paradas Hoje</div></div>
+        <div class="stat-card accent"><div class="stat-val" id="s-turno">—</div><div class="stat-lbl">No Turno Atual</div></div>
+      </div>
+
+      <!-- PARADA ATIVA -->
+      <div class="card" id="parada-ativa-card" style="display:none;">
+        <div class="card-title" style="color:var(--warn);">⚠️ Parada em Andamento</div>
+        <div id="pa-info"></div>
+        <div class="timer-box">
+          <div class="timer-val" id="timer-disp">00:00:00</div>
+          <div class="timer-lbl">Tempo decorrido</div>
+        </div>
+        <div class="fg">
+          <label>Observações Finais (opcional)</label>
+          <textarea id="obs-final" rows="2" placeholder="Anotações sobre resolução..."></textarea>
+        </div>
+        <button class="btn btn-success" style="width:100%;margin-top:8px;" onclick="fecharParada()">✅ Encerrar Parada</button>
+      </div>
+
+      <!-- FORM NOVA PARADA -->
+      <div class="card" id="form-reg">
+        <div class="card-title">⏱ Nova Parada</div>
+        <div class="fg">
+          <label>Turno *</label>
+          <div class="turno-btns">
+            <div class="tbtn sa" id="tbA" onclick="selTurno('A')">Turno A</div>
+            <div class="tbtn" id="tbB" onclick="selTurno('B')">Turno B</div>
+            <div class="tbtn" id="tbC" onclick="selTurno('C')">Turno C</div>
+          </div>
+        </div>
+        <div class="fgrid">
+          <div class="fg">
+            <label>Máquina *</label>
+            <select id="sel-maq">
+              <option value="">— selecione —</option>
+              <option>Politriz Simec 20 cabeças</option>
+              <option>Politriz Simec 22 cabeças</option>
+              <option>Multifios Ramos 7.3</option>
+              <option>Multifio Hedel 5.3</option>
+              <option>Forno Automático R1</option>
+              <option>Forno de Passagem R2</option>
+              <option>Forno de Passagem R3</option>
+              <option>Forno Hedel</option>
+              <option>Ponte Rolante 1 - Serraria</option>
+              <option>Ponte Rolante 2 - Serraria</option>
+              <option>Ponte Rolante 3 - Levigatriz</option>
+              <option>Ponte Rolante 4 - Levigatriz</option>
+              <option>Ponte Rolante 5 - Resina</option>
+              <option>Ponte Rolante 6 - Resina/Ovação</option>
+              <option>Ponte Rolante 7 - Ovação</option>
+              <option>Ponte Rolante 8 - Politriz</option>
+              <option>Ponte Rolante 9 - Ovação</option>
+              <option>Ponte Rolante 10 - Ovação</option>
+              <option>Pórtico 1 - Dep. Externo</option>
+              <option>Pórtico 2 - Tratamento</option>
+              <option>Ponte de Bloco</option>
+              <option>Monofio</option>
+              <option>Pórtico 3 - Resina 2</option>
+              <option>Pórtico 4 - Resina 3</option>
+              <option>Pórtico 5 - Retoque</option>
+              <option>Pórtico 6 - Retoque</option>
+              <option>Silo 1 - Serraria</option>
+              <option>Silo 2 - Politriz</option>
+              <option>Misturador</option>
+              <option>Filtro-Prensa</option>
+              <option>Dosadora</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Data/Hora Início *</label>
+            <input type="datetime-local" id="inp-ini">
+          </div>
+          <div class="fg ffull">
+            <label>Motivo da Parada *</label>
+            <div class="ac-wrap">
+              <input type="text" id="inp-mot" placeholder="Digite para filtrar..." autocomplete="off"
+                oninput="filtrarMotivos(this.value)" onfocus="filtrarMotivos(this.value)" onblur="setTimeout(()=>fecharAC(),200)">
+              <div class="ac-list" id="ac-list"></div>
+            </div>
+            <input type="hidden" id="mot-tipo">
+            <input type="hidden" id="mot-prog">
+          </div>
+          <div class="fg">
+            <label>Categoria</label>
+            <input type="text" id="show-tipo" readonly style="background:var(--surface2);cursor:default;">
+          </div>
+          <div class="fg">
+            <label>Programada / Não Programada</label>
+            <input type="text" id="show-prog" readonly style="background:var(--surface2);cursor:default;">
+          </div>
+          <div class="fg ffull">
+            <label>Observações</label>
+            <textarea id="inp-obs" rows="2" placeholder="Detalhes adicionais (opcional)"></textarea>
+          </div>
+        </div>
+        <div id="alert-reg"></div>
+        <div class="factions">
+          <button class="btn btn-accent" style="width:100%;" onclick="abrirParada()">⏱ Iniciar Registro de Parada</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA HISTÓRICO -->
+    <div id="tab-hist" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:700;color:var(--primary);">Histórico de Paradas</div>
+        <button class="btn btn-sm btn-outline" onclick="exportCSV()">⬇ CSV</button>
+      </div>
+      <div class="fbar">
+        <input type="date" id="f-data" onchange="renderHist()">
+        <select id="f-maq" onchange="renderHist()">
+          <option value="">Todas as máquinas</option>
+          <option>Politriz Simec 20 cabeças</option>
+          <option>Politriz Simec 22 cabeças</option>
+          <option>Multifios Ramos 7.3</option>
+          <option>Multifio Hedel 5.3</option>
+          <option>Forno Automático R1</option>
+          <option>Forno de Passagem R2</option>
+          <option>Forno de Passagem R3</option>
+          <option>Forno Hedel</option>
+          <option>Ponte Rolante 1 - Serraria</option>
+          <option>Ponte Rolante 2 - Serraria</option>
+          <option>Ponte Rolante 3 - Levigatriz</option>
+          <option>Ponte Rolante 4 - Levigatriz</option>
+          <option>Ponte Rolante 5 - Resina</option>
+          <option>Ponte Rolante 6 - Resina/Ovação</option>
+          <option>Ponte Rolante 7 - Ovação</option>
+          <option>Ponte Rolante 8 - Politriz</option>
+          <option>Ponte Rolante 9 - Ovação</option>
+          <option>Ponte Rolante 10 - Ovação</option>
+          <option>Pórtico 1 - Dep. Externo</option>
+          <option>Pórtico 2 - Tratamento</option>
+          <option>Ponte de Bloco</option>
+          <option>Monofio</option>
+          <option>Pórtico 3 - Resina 2</option>
+          <option>Pórtico 4 - Resina 3</option>
+          <option>Pórtico 5 - Retoque</option>
+          <option>Pórtico 6 - Retoque</option>
+          <option>Silo 1 - Serraria</option>
+          <option>Silo 2 - Politriz</option>
+          <option>Misturador</option>
+          <option>Filtro-Prensa</option>
+          <option>Dosadora</option>
+        </select>
+        <select id="f-tipo" onchange="renderHist()">
+          <option value="">Todos os tipos</option>
+          <option value="MANUTENÇÃO">Manutenção</option>
+          <option value="OUTROS">Outros</option>
+          <option value="SETUP">Setup</option>
+        </select>
+        <select id="f-turno" onchange="renderHist()">
+          <option value="">Todos os turnos</option>
+          <option value="A">Turno A</option>
+          <option value="B">Turno B</option>
+          <option value="C">Turno C</option>
+        </select>
+        <select id="f-status" onchange="renderHist()">
+          <option value="">Todos</option>
+          <option value="aberta">Em aberto</option>
+          <option value="fechada">Encerradas</option>
+        </select>
+        <button class="btn btn-sm btn-outline" onclick="limparFiltros()">Limpar</button>
+      </div>
+      <div class="card" style="padding:0;">
+        <div class="twrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Máquina</th>
+                <th>Motivo</th>
+                <th>Tipo</th>
+                <th>Turno</th>
+                <th>Duração</th>
+                <th>Status</th>
+                <th>Operador</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="hist-body">
+              <tr><td colspan="9" class="nodata"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA RELATÓRIO -->
+    <div id="tab-rel" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:700;color:var(--primary);">Relatório de Paradas</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="date" id="r-de" style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <input type="date" id="r-ate" style="padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <button class="btn btn-sm btn-primary" onclick="gerarRel()">Gerar Relatório</button>
+        </div>
+      </div>
+      <div id="rel-body"><div style="text-align:center;padding:50px;color:var(--text3);">Selecione o período e clique em Gerar Relatório</div></div>
+    </div>
+
+    <!-- ABA ADMIN -->
+    <div id="tab-adm" style="display:none;">
+      <div style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:16px;">Administração — SIGEPA</div>
+      <div class="card">
+        <div class="card-title">👤 Cadastrar Operador</div>
+        <div class="fgrid">
+          <div class="fg"><label>Nome Completo *</label><input type="text" id="a-nome" placeholder="Nome do operador"></div>
+          <div class="fg"><label>Código de Acesso *</label><input type="text" id="a-cod" placeholder="Ex: OP001" style="text-transform:uppercase;"></div>
+          <div class="fg"><label>Senha *</label><input type="password" id="a-sen" placeholder="Mínimo 6 caracteres"></div>
+          <div class="fg"><label>Nível *</label>
+            <select id="a-niv">
+              <option value="">— selecione —</option>
+              <option value="operador">Operador</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="gerente">Gerente</option>
+            </select>
+          </div>
+          <div class="fg"><label>Turno Padrão</label>
+            <select id="a-tur">
+              <option value="">—</option>
+              <option value="A">Turno A</option>
+              <option value="B">Turno B</option>
+              <option value="C">Turno C</option>
+            </select>
+          </div>
+        </div>
+        <div id="alert-adm"></div>
+        <div class="factions"><button class="btn btn-primary" onclick="cadastrarOp()">+ Cadastrar</button></div>
+        <div style="margin-top:20px;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Operadores Cadastrados</div>
+        <div id="lista-ops"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Modal detalhe -->
+<div class="moverlay" id="modal-det">
+  <div class="modal">
+    <div class="mtitle">Detalhe da Parada <span class="mclose" onclick="closeMod('modal-det')">✕</span></div>
+    <div id="modal-det-body"></div>
+  </div>
+</div>
+
+<!-- Modal editar parada -->
+<div class="moverlay" id="modal-edit">
+  <div class="modal">
+    <div class="mtitle">Editar Parada <span class="mclose" onclick="closeMod('modal-edit')">✕</span></div>
+    <input type="hidden" id="edit-key">
+    <div class="fg"><label>Máquina</label>
+      <select id="edit-maq">
+        <option>Politriz Simec 20 cabeças</option><option>Politriz Simec 22 cabeças</option>
+        <option>Multifios Ramos 7.3</option><option>Multifio Hedel 5.3</option>
+        <option>Forno Automático R1</option><option>Forno de Passagem R2</option>
+        <option>Forno de Passagem R3</option><option>Forno Hedel</option>
+        <option>Ponte Rolante 1 - Serraria</option><option>Ponte Rolante 2 - Serraria</option>
+        <option>Ponte Rolante 3 - Levigatriz</option><option>Ponte Rolante 4 - Levigatriz</option>
+        <option>Ponte Rolante 5 - Resina</option><option>Ponte Rolante 6 - Resina/Ovação</option>
+        <option>Ponte Rolante 7 - Ovação</option><option>Ponte Rolante 8 - Politriz</option>
+        <option>Ponte Rolante 9 - Ovação</option><option>Ponte Rolante 10 - Ovação</option>
+        <option>Pórtico 1 - Dep. Externo</option><option>Pórtico 2 - Tratamento</option>
+        <option>Ponte de Bloco</option><option>Monofio</option>
+        <option>Pórtico 3 - Resina 2</option><option>Pórtico 4 - Resina 3</option>
+        <option>Pórtico 5 - Retoque</option><option>Pórtico 6 - Retoque</option>
+        <option>Silo 1 - Serraria</option><option>Silo 2 - Politriz</option>
+        <option>Misturador</option><option>Filtro-Prensa</option><option>Dosadora</option>
+      </select>
+    </div>
+    <div class="fg"><label>Turno</label>
+      <select id="edit-turno"><option value="A">Turno A</option><option value="B">Turno B</option><option value="C">Turno C</option></select>
+    </div>
+    <div class="fg"><label>Motivo</label><input type="text" id="edit-mot"></div>
+    <div class="fg"><label>Categoria</label>
+      <select id="edit-tipo">
+        <option value="MANUTENÇÃO">MANUTENÇÃO</option>
+        <option value="OUTROS">OUTROS</option>
+        <option value="SETUP">SETUP</option>
+      </select>
+    </div>
+    <div class="fg"><label>Programada</label>
+      <select id="edit-prog"><option value="PROGRAMADA">PROGRAMADA</option><option value="NÃO PROGRAMADA">NÃO PROGRAMADA</option></select>
+    </div>
+    <div class="fg"><label>Data/Hora Início</label><input type="datetime-local" id="edit-ini"></div>
+    <div class="fg"><label>Data/Hora Fim</label><input type="datetime-local" id="edit-fim"></div>
+    <div class="fg"><label>Observações</label><textarea id="edit-obs" rows="2"></textarea></div>
+    <div id="alert-edit"></div>
+    <div class="factions">
+      <button class="btn btn-outline" onclick="closeMod('modal-edit')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEdicao()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PWA Banner -->
+<div id="pwa-banner" style="display:none;">
+  🏭 Instalar SIGEPA como app
+  <button onclick="installPWA()">Instalar</button>
+  <button class="pwa-close" onclick="document.getElementById('pwa-banner').style.display='none'">✕</button>
+</div>
+
+<script>
+// =============================================
+// FIREBASE
+// =============================================
+var FBCFG = {
+  apiKey: "AIzaSyCba7sVNy1zeClbQQ_2yo4x05L4aOn3Atw",
+  authDomain: "abrasivpro-7c631.firebaseapp.com",
+  databaseURL: "https://abrasivpro-7c631-default-rtdb.firebaseio.com",
+  projectId: "abrasivpro-7c631",
+  storageBucket: "abrasivpro-7c631.firebasestorage.app",
+  messagingSenderId: "58331677167",
+  appId: "1:58331677167:web:053c09134c09030530b61a"
+};
+var fbApp = firebase.initializeApp(FBCFG, 'sigepa');
+var db = firebase.database(fbApp);
+var auth = firebase.auth(fbApp);
+var BASE = '/setap';
+
+// =============================================
+// MOTIVOS — exatamente como no sfca004.xlsx
+// =============================================
+var MOTIVOS = [
+  // MANUTENÇÃO — NÃO PROGRAMADA
+  {d:'ALARME - ELEVADOR', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'ALARME - CARRO TRANSBORDO', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'DEFEITO ELÉTRICO', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'DEFEITO MECÂNICO', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'FALTA DE ÁGUA', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'FALTA DE AR NA LINHA', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'MANUTENÇÃO CORRETIVA', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'ALARME - MICRO ONDAS', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'MANUTENÇÃO DO SILO', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'PROBLEMA NO ETA', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'ALARME - ROBÔ (ENTRADA/SAÍDA)', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'REGULAGEM', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  {d:'ALARME - ROBÔ RESINA', t:'MANUTENÇÃO', p:'NÃO PROGRAMADA'},
+  // MANUTENÇÃO — PROGRAMADA
+  {d:'MANUTENÇÃO PREVENTIVA', t:'MANUTENÇÃO', p:'PROGRAMADA'},
+  // OUTROS — NÃO PROGRAMADA
+  {d:'AGUARDANDO INSPEÇÃO', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'BUSCANDO MATERIAL NO ALMOXARIFADO', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'BAIXA TEMPERATURA - CATÁLISE INCOMPLETA', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'FALHA OPERACIONAL', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'FALTA DE ENERGIA ELÉTRICA', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'FALTA DE MATÉRIA PRIMA', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'FALTA DE OPERADOR', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'FALTA DE SERVIÇO', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'FIM DO TURNO', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'PREENCHENDO CHECKLIST', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'PROBLEMA NO MATERIAL', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'QUEBRA DE CHAPA', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'QUEBRA DE FIO', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  {d:'TIRANDO FOTO', t:'OUTROS', p:'NÃO PROGRAMADA'},
+  // OUTROS — PROGRAMADA
+  {d:'CAFÉ DA MANHÃ MENSAL', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'DEDETIZAÇÃO', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'EXAME PERIÓDICO', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'FOLGA OPERADOR', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'JOGO DO BRASIL', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'LIMPEZA', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'ORAÇÃO', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'PARADA PARA REFEIÇÃO', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'REUNIÃO', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'SIPAT', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'TESTE DE MATERIAL', t:'OUTROS', p:'PROGRAMADA'},
+  {d:'TREINAMENTO', t:'OUTROS', p:'PROGRAMADA'},
+  // SETUP — NÃO PROGRAMADA
+  {d:'ABASTECENDO A LINHA', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'CALÇAR CUNHA', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'CALIBRAGEM', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'ESQUENTANDO AS CHAPAS', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'ESVAZIANDO FORNO', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'ESVAZIANDO A ESTEIRA', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'FALTA DE ESPAÇO', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'LIXANDO ABRASIVOS', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'MOVIMENTAÇÃO DE MATERIAIS', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'MOVIMENTAÇÃO DE CISTERNA', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'SEQUENCIANDO MATERIAL', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'TROCA DE ABRASIVOS', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'TROCA DE CARRINHO', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'TROCA DE MESA', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'TROCA DE CISTERNA', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'TROCA DE SEQUÊNCIA', t:'SETUP', p:'NÃO PROGRAMADA'},
+  {d:'TROCA DE TELA', t:'SETUP', p:'NÃO PROGRAMADA'},
+  // SETUP — PROGRAMADA
+  {d:'LIXANDO O MATERIAL', t:'SETUP', p:'PROGRAMADA'},
+  {d:'OPERANDO OUTRO EQUIPAMENTO', t:'SETUP', p:'PROGRAMADA'}
+];
+
+// =============================================
+// ESTADO
+// =============================================
+var USR = null;
+var TURNO = 'A';
+var PARADA = null;
+var TIMER = null;
+var CACHE = {};
+var OPS = {};
+var deferredPrompt = null;
+
+// =============================================
+// SHA-256
+// =============================================
+async function sha256(s) {
+  var b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+// =============================================
+// LOGIN
+// =============================================
+document.getElementById('l-sen').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('l-cod').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('l-sen').focus(); });
+document.getElementById('l-cod').addEventListener('input', function(){ this.value = this.value.toUpperCase(); });
+
+async function doLogin() {
+  var cod = document.getElementById('l-cod').value.trim().toUpperCase();
+  var sen = document.getElementById('l-sen').value;
+  var err = document.getElementById('l-err');
+  err.style.display = 'none';
+  if (!cod || !sen) { err.textContent = 'Preencha código e senha.'; err.style.display='block'; return; }
+  var hash = await sha256(sen);
+  try {
+    await firebase.auth(fbApp).signInWithEmailAndPassword('gustavorainha24@gmail.com','APsistema2026!');
+  } catch(e) { err.textContent = 'Erro de conexão.'; err.style.display='block'; return; }
+  db.ref(BASE+'/usuarios').orderByChild('codigo').equalTo(cod).once('value', snap => {
+    if (!snap.exists()) { err.textContent = 'Código não encontrado.'; err.style.display='block'; return; }
+    var key = Object.keys(snap.val())[0];
+    var u = snap.val()[key];
+    if (u.hash !== hash) { err.textContent = 'Senha incorreta.'; err.style.display='block'; return; }
+    if (!u.ativo) { err.textContent = 'Usuário inativo.'; err.style.display='block'; return; }
+    USR = { key, ...u };
+    TURNO = u.turnopadrao || 'A';
+    iniciarApp();
+  });
+}
+
+// =============================================
+// APP
+// =============================================
+function iniciarApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('tb-nome').textContent = USR.nome;
+  document.getElementById('tb-nivel').textContent = nvLabel(USR.nivel);
+  // Teste de permissão de escrita
+  db.ref(BASE+'/_ping').set({t: Date.now()}, function(err) {
+    if (err) {
+      console.warn('SIGEPA: sem permissão de escrita no Firebase —', err.message);
+    } else {
+      db.ref(BASE+'/_ping').remove();
+    }
+  });
+
+  // Controle de tabs por nível
+  document.getElementById('nt-rel').style.display = (USR.nivel==='gerente'||USR.nivel==='supervisor') ? '' : 'none';
+  document.getElementById('nt-adm').style.display = USR.nivel==='gerente' ? '' : 'none';
+
+  selTurno(TURNO);
+  setDtAgora();
+  carregarParadas();
+  carregarOps();
+
+  // Verificar parada aberta
+  db.ref(BASE+'/paradas').orderByChild('operadorKey').equalTo(USR.key).limitToLast(10).once('value', snap => {
+    if (!snap.exists()) return;
+    snap.forEach(c => { var p=c.val(); if(p.status==='aberta'){ PARADA={key:c.key,...p}; mostrarAtiva(); } });
+  });
+
+  // PWA
+  if (deferredPrompt) document.getElementById('pwa-banner').style.display = 'flex';
+}
+
+function nvLabel(n) { return {operador:'Operador',supervisor:'Supervisor',gerente:'Gerente'}[n]||n; }
+
+function doLogout() {
+  USR=null; PARADA=null; clearInterval(TIMER);
+  firebase.auth(fbApp).signOut();
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('l-cod').value='';
+  document.getElementById('l-sen').value='';
+}
+
+// =============================================
+// TABS
+// =============================================
+function setTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab===tab));
+  ['reg','hist','rel','adm'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? '' : 'none';
+  });
+  if (tab==='hist') renderHist();
+  if (tab==='adm') renderOps();
+  if (tab==='rel') {
+    var hoje = new Date().toISOString().slice(0,10);
+    if (!document.getElementById('r-de').value) {
+      document.getElementById('r-de').value = hoje.slice(0,8)+'01';
+      document.getElementById('r-ate').value = hoje;
+    }
+  }
+}
+
+// =============================================
+// TURNO
+// =============================================
+function selTurno(t) {
+  TURNO = t;
+  ['A','B','C'].forEach(x => {
+    var b = document.getElementById('tb'+x);
+    b.className = 'tbtn' + (x===t ? ' s'+t.toLowerCase() : '');
+  });
+  document.getElementById('tb-turno').textContent = 'TURNO '+t;
+  atualizarStats();
+}
+
+function setDtAgora() {
+  var now = new Date();
+  var loc = new Date(now.getTime() - now.getTimezoneOffset()*60000);
+  document.getElementById('inp-ini').value = loc.toISOString().slice(0,16);
+}
+
+// =============================================
+// AUTOCOMPLETE MOTIVOS
+// =============================================
+function norm(s) { return s.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+
+function filtrarMotivos(q) {
+  var list = document.getElementById('ac-list');
+  var term = norm(q.trim());
+  var res = MOTIVOS.filter(m => norm(m.d).includes(term));
+  if (!res.length) {
+    list.innerHTML = '<div class="ac-item" style="color:var(--text3);">Nenhum resultado</div>';
+  } else {
+    var icones = {'MANUTENÇÃO':'🔧','OUTROS':'📌','SETUP':'⚙️'};
+    list.innerHTML = res.slice(0,25).map(m =>
+      `<div class="ac-item" onmousedown="selMotivo(${JSON.stringify(m.d)},${JSON.stringify(m.t)},${JSON.stringify(m.p)})">
+        ${icones[m.t]||''} ${m.d}
+        <div class="ac-sub">${m.t} · ${m.p}</div>
+      </div>`
+    ).join('');
+  }
+  list.classList.add('open');
+}
+
+function selMotivo(d, t, p) {
+  document.getElementById('inp-mot').value = d;
+  document.getElementById('mot-tipo').value = t;
+  document.getElementById('mot-prog').value = p;
+  document.getElementById('show-tipo').value = t;
+  document.getElementById('show-prog').value = p;
+  fecharAC();
+}
+
+function fecharAC() { document.getElementById('ac-list').classList.remove('open'); }
+
+// =============================================
+// ABRIR PARADA
+// =============================================
+function abrirParada() {
+  var maq = document.getElementById('sel-maq').value;
+  var ini = document.getElementById('inp-ini').value;
+  var mot = document.getElementById('inp-mot').value.trim();
+  var tipo = document.getElementById('mot-tipo').value;
+  var prog = document.getElementById('mot-prog').value;
+  var obs = document.getElementById('inp-obs').value.trim();
+  var al = document.getElementById('alert-reg');
+  al.innerHTML = '';
+
+  if (!maq) { showAl(al,'Selecione a máquina.','warn'); return; }
+  if (!ini) { showAl(al,'Informe data/hora de início.','warn'); return; }
+  if (!mot || !tipo) { showAl(al,'Selecione o motivo da lista.','warn'); return; }
+
+  var p = {
+    maquina: maq, turno: TURNO, motivo: mot, tipo: tipo,
+    programada: prog, obs: obs,
+    inicio: new Date(ini).toISOString(),
+    status: 'aberta',
+    operadorKey: USR.key, operadorNome: USR.nome,
+    criadoEm: new Date().toISOString()
+  };
+  var ref = db.ref(BASE+'/paradas').push(p, err => {
+    if (err) { showAl(al,'Erro: '+err.message,'danger'); return; }
+    PARADA = { key: ref.key, ...p };
+    CACHE[ref.key] = PARADA;
+    mostrarAtiva();
+    atualizarStats();
+  });
+}
+
+// =============================================
+// PARADA ATIVA
+// =============================================
+function mostrarAtiva() {
+  document.getElementById('form-reg').style.display = 'none';
+  var card = document.getElementById('parada-ativa-card');
+  card.style.display = '';
+  var p = PARADA;
+  document.getElementById('pa-info').innerHTML =
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div><div style="font-size:11px;color:var(--text3);font-weight:700;">MÁQUINA</div><div style="font-weight:700;font-size:15px;">${p.maquina}</div></div>
+      <div><div style="font-size:11px;color:var(--text3);font-weight:700;">TURNO</div><div>${p.turno}</div></div>
+      <div style="grid-column:1/-1;"><div style="font-size:11px;color:var(--text3);font-weight:700;">MOTIVO</div><div style="font-weight:600;">${p.motivo}</div></div>
+    </div>`;
+  iniciarTimer(new Date(p.inicio));
+}
+
+function iniciarTimer(dt) {
+  clearInterval(TIMER);
+  TIMER = setInterval(() => {
+    var d = Math.floor((Date.now()-dt.getTime())/1000);
+    var h=Math.floor(d/3600), m=Math.floor((d%3600)/60), s=d%60;
+    document.getElementById('timer-disp').textContent =
+      String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }, 1000);
+}
+
+function fecharParada() {
+  if (!PARADA) return;
+  clearInterval(TIMER);
+  var obs = document.getElementById('obs-final').value.trim();
+  var fim = new Date().toISOString();
+  var durMin = Math.round((new Date(fim)-new Date(PARADA.inicio))/60000);
+  db.ref(BASE+'/paradas/'+PARADA.key).update({ status:'fechada', fim, duracaoMin:durMin, obsFinal:obs }, err => {
+    if (err) { alert('Erro: '+err.message); return; }
+    PARADA = null;
+    document.getElementById('parada-ativa-card').style.display = 'none';
+    document.getElementById('form-reg').style.display = '';
+    document.getElementById('obs-final').value = '';
+    document.getElementById('inp-mot').value = '';
+    document.getElementById('mot-tipo').value = '';
+    document.getElementById('mot-prog').value = '';
+    document.getElementById('show-tipo').value = '';
+    document.getElementById('show-prog').value = '';
+    document.getElementById('sel-maq').value = '';
+    document.getElementById('inp-obs').value = '';
+    setDtAgora();
+    carregarParadas();
+    showAl(document.getElementById('alert-reg'), '✅ Parada encerrada. Duração: '+durMin+' min.', 'success');
+  });
+}
+
+// =============================================
+// CARREGAR PARADAS
+// =============================================
+function carregarParadas() {
+  db.ref(BASE+'/paradas').on('value', snap => {
+    CACHE = {};
+    if (snap.exists()) snap.forEach(c => { CACHE[c.key]={key:c.key,...c.val()}; });
+    atualizarStats();
+    if (document.getElementById('tab-hist').style.display!=='none') renderHist();
+  });
+}
+
+// =============================================
+// STATS
+// =============================================
+function atualizarStats() {
+  var hoje = new Date().toISOString().slice(0,10);
+  var all = Object.values(CACHE);
+  var ph = all.filter(p=>p.inicio&&p.inicio.slice(0,10)===hoje);
+  var ab = all.filter(p=>p.status==='aberta');
+  var hh = ph.filter(p=>p.duracaoMin).reduce((a,p)=>a+(p.duracaoMin||0),0);
+  var pt = ph.filter(p=>p.turno===TURNO);
+  document.getElementById('s-hoje').textContent = ph.length;
+  document.getElementById('s-abertas').textContent = ab.length;
+  document.getElementById('s-horas').textContent = (hh/60).toFixed(1)+'h';
+  document.getElementById('s-turno').textContent = pt.length;
+}
+
+// =============================================
+// HISTÓRICO
+// =============================================
+function renderHist() {
+  var tbody = document.getElementById('hist-body');
+  var fd=document.getElementById('f-data').value;
+  var fm=document.getElementById('f-maq').value;
+  var ft=document.getElementById('f-tipo').value;
+  var ftu=document.getElementById('f-turno').value;
+  var fs=document.getElementById('f-status').value;
+
+  var lista = Object.values(CACHE).filter(p => {
+    if (fd && (!p.inicio||p.inicio.slice(0,10)!==fd)) return false;
+    if (fm && p.maquina!==fm) return false;
+    if (ft && p.tipo!==ft) return false;
+    if (ftu && p.turno!==ftu) return false;
+    if (fs && p.status!==fs) return false;
+    if (USR.nivel==='operador' && p.operadorKey!==USR.key) return false;
+    return true;
+  }).sort((a,b)=>(b.inicio||'').localeCompare(a.inicio||''));
+
+  if (!lista.length) { tbody.innerHTML='<tr><td colspan="9" class="nodata">Nenhuma parada encontrada.</td></tr>'; return; }
+
+  var tipoBadge = {
+    'MANUTENÇÃO':'<span class="badge badge-manut">Manutenção</span>',
+    'OUTROS':'<span class="badge badge-outros">Outros</span>',
+    'SETUP':'<span class="badge badge-setup">Setup</span>'
+  };
+  var canDel = USR.nivel==='gerente'||USR.nivel==='supervisor';
+
+  tbody.innerHTML = lista.map(p => {
+    var dur = p.duracaoMin ? p.duracaoMin+' min' : (p.status==='aberta'?'⏱ Em aberto':'—');
+    var tb = '<span class="badge badge-t'+p.turno.toLowerCase()+'">Turno '+p.turno+'</span>';
+    var sb = p.status==='aberta'?'<span class="badge badge-aberta">⚠ Aberta</span>':'<span class="badge badge-fechada">✓ Fechada</span>';
+    var dt = p.inicio ? new Date(p.inicio).toLocaleString('pt-BR') : '—';
+    return `<tr>
+      <td style="white-space:nowrap;font-size:12px;">${dt}</td>
+      <td style="font-weight:600;font-size:12px;max-width:130px;">${p.maquina||'—'}</td>
+      <td style="max-width:160px;font-size:12px;">${p.motivo||'—'}</td>
+      <td>${tipoBadge[p.tipo]||p.tipo}</td>
+      <td>${tb}</td>
+      <td style="font-size:12px;white-space:nowrap;">${dur}</td>
+      <td>${sb}</td>
+      <td style="font-size:12px;">${p.operadorNome||'—'}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-xs btn-outline" onclick="verDet('${p.key}')">Ver</button>
+        ${canDel?`<button class="btn btn-xs btn-primary" style="background:var(--primary-light);" onclick="abrirEdicao('${p.key}')">✏</button>`:''}
+        ${canDel?`<button class="btn btn-xs btn-danger" onclick="delParada('${p.key}')">🗑</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function verDet(key) {
+  var p = CACHE[key]; if (!p) return;
+  var r = (l,v)=>`<tr><td style="padding:8px 4px;font-size:11px;color:var(--text3);font-weight:700;width:130px;">${l}</td><td style="padding:8px 4px;font-size:13px;">${v||'—'}</td></tr>`;
+  document.getElementById('modal-det-body').innerHTML =
+    '<table style="width:100%;border-collapse:collapse;">' +
+    r('Máquina',p.maquina)+r('Turno','Turno '+(p.turno||'—'))+
+    r('Motivo',p.motivo)+r('Categoria',p.tipo)+r('Programada',p.programada)+
+    r('Início',p.inicio?new Date(p.inicio).toLocaleString('pt-BR'):'')+
+    r('Fim',p.fim?new Date(p.fim).toLocaleString('pt-BR'):'')+
+    r('Duração',p.duracaoMin?p.duracaoMin+' min':'')+
+    r('Status',p.status)+r('Operador',p.operadorNome)+
+    r('Obs. Inicial',p.obs)+r('Obs. Final',p.obsFinal)+'</table>';
+  document.getElementById('modal-det').classList.add('open');
+}
+
+function abrirEdicao(key) {
+  var p = CACHE[key]; if (!p) return;
+  document.getElementById('edit-key').value = key;
+  document.getElementById('edit-maq').value = p.maquina||'';
+  document.getElementById('edit-turno').value = p.turno||'A';
+  document.getElementById('edit-mot').value = p.motivo||'';
+  document.getElementById('edit-tipo').value = p.tipo||'OUTROS';
+  document.getElementById('edit-prog').value = p.programada||'NÃO PROGRAMADA';
+  document.getElementById('edit-obs').value = (p.obs||'')+(p.obsFinal?' | '+p.obsFinal:'');
+  // Converter ISO para datetime-local
+  var toLocal = iso => {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  };
+  document.getElementById('edit-ini').value = toLocal(p.inicio);
+  document.getElementById('edit-fim').value = toLocal(p.fim);
+  document.getElementById('alert-edit').innerHTML = '';
+  document.getElementById('modal-edit').classList.add('open');
+}
+
+function salvarEdicao() {
+  var key = document.getElementById('edit-key').value;
+  var iniVal = document.getElementById('edit-ini').value;
+  var fimVal = document.getElementById('edit-fim').value;
+  var al = document.getElementById('alert-edit');
+  if (!iniVal) { showAl(al,'Informe o início.','warn'); return; }
+  var ini = new Date(iniVal).toISOString();
+  var fim = fimVal ? new Date(fimVal).toISOString() : null;
+  var durMin = (fim && ini) ? Math.round((new Date(fim)-new Date(ini))/60000) : null;
+  var upd = {
+    maquina: document.getElementById('edit-maq').value,
+    turno: document.getElementById('edit-turno').value,
+    motivo: document.getElementById('edit-mot').value,
+    tipo: document.getElementById('edit-tipo').value,
+    programada: document.getElementById('edit-prog').value,
+    obs: document.getElementById('edit-obs').value,
+    inicio: ini,
+    fim: fim||null,
+    duracaoMin: durMin,
+    status: fim ? 'fechada' : 'aberta',
+    editadoEm: new Date().toISOString(),
+    editadoPor: USR.nome
+  };
+  db.ref(BASE+'/paradas/'+key).update(upd, err => {
+    if (err) { showAl(al,'Erro: '+err.message,'danger'); return; }
+    showAl(al,'✅ Salvo!','success');
+    setTimeout(()=>closeMod('modal-edit'),1200);
+  });
+}
+
+function delParada(key) {
+  if (!confirm('Excluir este registro permanentemente?')) return;
+  db.ref(BASE+'/paradas/'+key).remove();
+}
+
+function limparFiltros() {
+  ['f-data','f-maq','f-tipo','f-turno','f-status'].forEach(id=>document.getElementById(id).value='');
+  renderHist();
+}
+
+function closeMod(id) { document.getElementById(id).classList.remove('open'); }
+
+// =============================================
+// EXPORTAR CSV
+// =============================================
+function exportCSV() {
+  var lista = Object.values(CACHE).filter(p=>USR.nivel!=='operador'||p.operadorKey===USR.key);
+  var rows = [['Data Início','Fim','Máquina','Turno','Motivo','Tipo','Programada','Duração (min)','Status','Operador','Obs']];
+  lista.forEach(p => rows.push([
+    p.inicio?new Date(p.inicio).toLocaleString('pt-BR'):'',
+    p.fim?new Date(p.fim).toLocaleString('pt-BR'):'',
+    p.maquina||'',p.turno||'',p.motivo||'',p.tipo||'',p.programada||'',
+    p.duracaoMin||'',p.status||'',p.operadorNome||'',
+    (p.obs||'')+(p.obsFinal?' | '+p.obsFinal:'')
+  ]));
+  var csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'SIGEPA_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+// =============================================
+// RELATÓRIO
+// =============================================
+function gerarRel() {
+  var de=document.getElementById('r-de').value;
+  var ate=document.getElementById('r-ate').value;
+  var el=document.getElementById('rel-body');
+  if (!de||!ate) { el.innerHTML='<div class="alert alert-warn">Selecione o período completo.</div>'; return; }
+
+  var lista=Object.values(CACHE).filter(p=>{
+    if(!p.inicio||p.status!=='fechada') return false;
+    var d=p.inicio.slice(0,10); return d>=de&&d<=ate;
+  });
+
+  if (!lista.length) { el.innerHTML='<div style="text-align:center;padding:50px;color:var(--text3);">Nenhuma parada encerrada no período.</div>'; return; }
+
+  var totMin=lista.reduce((a,p)=>a+(p.duracaoMin||0),0);
+  var nprog=lista.filter(p=>p.programada==='NÃO PROGRAMADA');
+  var prog=lista.filter(p=>p.programada==='PROGRAMADA');
+
+  // Por tipo
+  var pTipo={};
+  lista.forEach(p=>{ if(!pTipo[p.tipo]) pTipo[p.tipo]={qtd:0,min:0}; pTipo[p.tipo].qtd++; pTipo[p.tipo].min+=(p.duracaoMin||0); });
+
+  // Por máquina
+  var pMaq={};
+  lista.forEach(p=>{ var m=p.maquina||'—'; if(!pMaq[m]) pMaq[m]={qtd:0,min:0}; pMaq[m].qtd++; pMaq[m].min+=(p.duracaoMin||0); });
+  var maqOrd=Object.entries(pMaq).sort((a,b)=>b[1].min-a[1].min);
+  var maxMaq=Math.max(...Object.values(pMaq).map(v=>v.min));
+
+  // Por motivo
+  var pMot={};
+  lista.forEach(p=>{ var m=p.motivo||'—'; if(!pMot[m]) pMot[m]={qtd:0,min:0,tipo:p.tipo}; pMot[m].qtd++; pMot[m].min+=(p.duracaoMin||0); });
+  var motOrd=Object.entries(pMot).sort((a,b)=>b[1].min-a[1].min).slice(0,15);
+  var maxMot=Math.max(...Object.values(pMot).map(v=>v.min));
+
+  // Por turno
+  var pTur={A:{qtd:0,min:0},B:{qtd:0,min:0},C:{qtd:0,min:0}};
+  lista.forEach(p=>{ if(pTur[p.turno]){ pTur[p.turno].qtd++; pTur[p.turno].min+=(p.duracaoMin||0); } });
+
+  var tipoCores={'MANUTENÇÃO':'#f59e0b','OUTROS':'#3b82f6','SETUP':'#8b5cf6'};
+  var turCores={A:'#2563eb',B:'#7c3aed',C:'#be185d'};
+
+  el.innerHTML =
+    // Totais
+    `<div class="card" style="border-left:4px solid var(--primary);">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Período: <strong>${de}</strong> a <strong>${ate}</strong></div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-val">${lista.length}</div><div class="stat-lbl">Total Paradas</div></div>
+        <div class="stat-card danger"><div class="stat-val">${(totMin/60).toFixed(1)}h</div><div class="stat-lbl">Horas Paradas</div></div>
+        <div class="stat-card warn"><div class="stat-val">${nprog.length}</div><div class="stat-lbl">Não Programadas</div></div>
+        <div class="stat-card success"><div class="stat-val">${prog.length}</div><div class="stat-lbl">Programadas</div></div>
+      </div>
+    </div>` +
+
+    // Por tipo
+    `<div class="card"><div class="card-title">📂 Horas por Categoria</div>` +
+    Object.entries(pTipo).map(([k,v])=>{
+      var pct=totMin>0?(v.min/totMin*100).toFixed(1):0;
+      return `<div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-weight:700;">${k}</span>
+          <span style="font-size:12px;color:var(--text2);">${(v.min/60).toFixed(1)}h · ${v.qtd} ocorrências · ${pct}%</span>
+        </div>
+        <div style="background:var(--border);border-radius:6px;height:22px;overflow:hidden;">
+          <div style="width:${pct}%;background:${tipoCores[k]||'#6b7280'};height:100%;border-radius:6px;"></div>
+        </div>
+      </div>`;
+    }).join('') + '</div>' +
+
+    // Por turno
+    `<div class="card"><div class="card-title">🔄 Paradas por Turno</div>` +
+    Object.entries(pTur).map(([k,v])=>{
+      var pct=totMin>0?(v.min/totMin*100).toFixed(1):0;
+      return `<div class="rbar-row">
+        <div class="rbar-lbl">Turno ${k} (${v.qtd}x)</div>
+        <div class="rbar-track"><div class="rbar-fill" style="width:${pct}%;background:${turCores[k]};"><span class="rbar-val">${(v.min/60).toFixed(1)}h</span></div></div>
+      </div>`;
+    }).join('') + '</div>' +
+
+    // Por máquina
+    `<div class="card"><div class="card-title">⚙️ Ranking — Horas por Máquina</div>` +
+    maqOrd.map(([k,v])=>{
+      var pct=maxMaq>0?(v.min/maxMaq*100).toFixed(0):0;
+      return `<div class="rbar-row">
+        <div class="rbar-lbl">${k} (${v.qtd}x)</div>
+        <div class="rbar-track"><div class="rbar-fill" style="width:${pct}%;"><span class="rbar-val">${(v.min/60).toFixed(1)}h</span></div></div>
+      </div>`;
+    }).join('') + '</div>' +
+
+    // Por motivo
+    `<div class="card"><div class="card-title">📋 Top 15 — Motivos</div>` +
+    motOrd.map(([k,v])=>{
+      var pct=maxMot>0?(v.min/maxMot*100).toFixed(0):0;
+      return `<div class="rbar-row">
+        <div class="rbar-lbl">${k}</div>
+        <div class="rbar-track"><div class="rbar-fill" style="width:${pct}%;background:${tipoCores[v.tipo]||'#6b7280'};"><span class="rbar-val">${v.qtd}x · ${(v.min/60).toFixed(1)}h</span></div></div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+// =============================================
+// ADMIN
+// =============================================
+function carregarOps() {
+  db.ref(BASE+'/usuarios').on('value', snap => {
+    OPS = {};
+    if (snap.exists()) snap.forEach(c=>{ OPS[c.key]={key:c.key,...c.val()}; });
+    if (document.getElementById('tab-adm').style.display!=='none') renderOps();
+  });
+}
+
+function renderOps() {
+  var el=document.getElementById('lista-ops');
+  var lista=Object.values(OPS);
+  if (!lista.length) { el.innerHTML='<div style="color:var(--text3);font-size:13px;">Nenhum operador cadastrado.</div>'; return; }
+  var rows = lista.map(u => {
+    var statusBadge = u.ativo
+      ? '<span class="badge badge-fechada">Ativo</span>'
+      : '<span class="badge badge-aberta">Inativo</span>';
+    var btnClass = u.ativo ? 'btn-danger' : 'btn-success';
+    var btnLabel = u.ativo ? 'Desativar' : 'Ativar';
+    var novoStatus = u.ativo ? 0 : 1;
+    return `<tr>
+      <td>${u.nome}</td>
+      <td style="font-family:monospace;font-weight:700;">${u.codigo}</td>
+      <td>${nvLabel(u.nivel)}</td>
+      <td>${u.turnopadrao||'—'}</td>
+      <td>${statusBadge}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-xs ${btnClass}" onclick="toggleOp('${u.key}',${novoStatus})">${btnLabel}</button>
+        <button class="btn btn-xs btn-danger" style="margin-left:4px;" onclick="apagarOp('${u.key}','${u.nome.replace(/'/g,"\\'")}')">🗑 Apagar</button>
+      </td>
+    </tr>`;
+  }).join('');
+  el.innerHTML='<div class="twrap"><table><thead><tr><th>Nome</th><th>Código</th><th>Nível</th><th>Turno</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+async function cadastrarOp() {
+  var nome=document.getElementById('a-nome').value.trim();
+  var cod=document.getElementById('a-cod').value.trim().toUpperCase();
+  var sen=document.getElementById('a-sen').value;
+  var niv=document.getElementById('a-niv').value;
+  var tur=document.getElementById('a-tur').value;
+  var al=document.getElementById('alert-adm');
+  al.innerHTML='';
+  if (!nome||!cod||!sen||!niv) { showAl(al,'Preencha todos os campos.','warn'); return; }
+  if (sen.length<6) { showAl(al,'Senha mínimo 6 caracteres.','warn'); return; }
+  if (Object.values(OPS).some(u=>u.codigo===cod)) { showAl(al,'Código já existe.','danger'); return; }
+  var hash=await sha256(sen);
+  db.ref(BASE+'/usuarios').push({nome,codigo:cod,hash,nivel:niv,turnopadrao:tur||null,ativo:true,criadoEm:new Date().toISOString()}, err=>{
+    if (err) { showAl(al,'Erro: '+err.message,'danger'); return; }
+    showAl(al,'✅ Operador cadastrado!','success');
+    document.getElementById('a-nome').value='';
+    document.getElementById('a-cod').value='';
+    document.getElementById('a-sen').value='';
+    document.getElementById('a-niv').value='';
+    document.getElementById('a-tur').value='';
+  });
+}
+
+function toggleOp(key, novoStatus) {
+  var ativo = novoStatus === 1;
+  var alAdm = document.getElementById('alert-adm');
+  db.ref(BASE+'/usuarios/'+key).update({ativo: ativo}, function(err) {
+    if (err) {
+      showAl(alAdm, '❌ Erro ao atualizar: ' + err.message, 'danger');
+    } else {
+      showAl(alAdm, ativo ? '✅ Usuário ativado.' : '✅ Usuário desativado.', 'success');
+    }
+  });
+}
+
+function apagarOp(key, nome) {
+  if (!confirm('Apagar o usuário "' + nome + '"? Esta ação não pode ser desfeita.')) return;
+  var alAdm = document.getElementById('alert-adm');
+  db.ref(BASE+'/usuarios/'+key).remove(function(err) {
+    if (err) {
+      showAl(alAdm, '❌ Erro ao apagar: ' + err.message, 'danger');
+    } else {
+      showAl(alAdm, '✅ Usuário apagado.', 'success');
+    }
+  });
+}
+
+// =============================================
+// UTIL
+// =============================================
+function showAl(el,msg,tipo) {
+  el.innerHTML=`<div class="alert alert-${tipo}">${msg}</div>`;
+  setTimeout(()=>{ if(el) el.innerHTML=''; },4000);
+}
+
+// =============================================
+// PWA — Service Worker + Install
+// =============================================
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('pwa-banner').style.display = 'flex';
+});
+
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    document.getElementById('pwa-banner').style.display = 'none';
+  });
+}
+
+// Registrar Service Worker inline
+if ('serviceWorker' in navigator) {
+  var swCode = `
+    const CACHE='sigepa-v1';
+    const FILES=[self.location.pathname];
+    self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
+    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
+  `;
+  var blob = new Blob([swCode],{type:'application/javascript'});
+  var swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+
+// Manifest dinâmico
+var manifest = {
+  name: 'SIGEPA',
+  short_name: 'SIGEPA',
+  description: 'Sistema de Gestão de Paradas',
+  start_url: window.location.href,
+  display: 'standalone',
+  background_color: '#1a3a5c',
+  theme_color: '#1a3a5c',
+  icons: [{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%231a3a5c"/><text y=".9em" font-size="80" x="10">🏭</text></svg>',sizes:'any',type:'image/svg+xml'}]
+};
+var mBlob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+document.getElementById('manifest-link').href = URL.createObjectURL(mBlob);
+</script>
+</body>
+</html>
